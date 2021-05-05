@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "6PzK053LxBa87oOYy9iw6J7Fsnc4ht46/LDWxvu/voszAwRsSRVuaZuhKUeawGZI6YvFL5yHkSiKsiOa28eVNA==",
+  "dgSpecHash": "atUcTBqujIA6kQ9gL0cvFLZ6h43g9l1EnFdeD7j64kF7qhdM/BzUepUboFgboysT2sUDdPUaqWdgjXqLjs4nfA==",
   "success": true,
-  "projectFilePath": "D:\\uni\\old\\NoleggioAutomezzi\\NoleggioAutomezzi.csproj",
+  "projectFilePath": "D:\\uni\\old\\NoleggioAutomezziBackEnd\\NoleggioAutomezzi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Diego Smacchia\\.nuget\\packages\\awssdk.core\\3.7.0.17\\awssdk.core.3.7.0.17.nupkg.sha512",
     "C:\\Users\\Diego Smacchia\\.nuget\\packages\\awssdk.simpleemail\\3.7.0.16\\awssdk.simpleemail.3.7.0.16.nupkg.sha512",
