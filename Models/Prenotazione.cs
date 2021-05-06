@@ -12,6 +12,6 @@ namespace NoleggioAutomezzi.Models
         public int idAutomezzo { get; set; }
         public DateTime dataInizio { get; set; }
         public DateTime dataFine { get; set; }
-        public bool confermata { get; set; }
+        public int stato { get; set; }
     }
 }

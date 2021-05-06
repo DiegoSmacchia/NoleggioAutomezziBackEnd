@@ -39,6 +39,30 @@ namespace NoleggioAutomezzi.Repository
             }
             return list;
         }
+        public List<Automezzo> ListAutomezziDisponibili()
+        {
+            List<Automezzo> list = new List<Automezzo>();
+            string queryString = "SELECT * FROM Automezzi WHERE MezzoDisponibile = 1;";
+
+            SqliteConnection connection = _repoDatabase.Connect();
+            SqliteCommand command = new SqliteCommand(queryString, connection);
+
+            SqliteDataReader reader = command.ExecuteReader();
+            try
+            {
+                while (reader.Read())
+                {
+                    Automezzo automezzo = fillAutomezzo(reader);
+                    list.Add(automezzo);
+                }
+            }
+            finally
+            {
+                reader.Close();
+                _repoDatabase.Close(connection);
+            }
+            return list;
+        }
         public Automezzo GetAutomezzoById(int Id)
         {
             Automezzo automezzo = null;

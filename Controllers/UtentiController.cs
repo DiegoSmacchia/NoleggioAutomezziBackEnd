@@ -26,11 +26,11 @@ namespace NoleggioAutomezzi.Controllers
                 UtentiRepository _repo = new UtentiRepository();
                 utente = _repo.Login(username, password);
             }
-            catch (LoginFailedException e)
+            catch (LoginFailedException)
             {
-                return StatusCode(403); //Forbidden
+                return StatusCode(401); //Unauthorized
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 return StatusCode(500); //InternalServerError
             }
@@ -50,11 +50,11 @@ namespace NoleggioAutomezzi.Controllers
                 UtentiRepository _repo = new UtentiRepository();
                 utente = _repo.CheckLogin(userId, password);
             }
-            catch (LoginFailedException e)
+            catch (LoginFailedException)
             {
-                return StatusCode(403); //Forbidden
+                return StatusCode(401); //Unauthorized
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500); //InternalServerError
             }
@@ -80,11 +80,11 @@ namespace NoleggioAutomezzi.Controllers
                 if (!_repo.UpdateUtente(utente))
                     throw new InvalidModelException();
             }
-            catch (InvalidModelException e)
+            catch (InvalidModelException)
             {
                 return StatusCode(400); //Bad Request
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500); //InternalServerError
             }

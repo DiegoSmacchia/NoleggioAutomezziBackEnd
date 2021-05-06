@@ -29,6 +29,17 @@ namespace NoleggioAutomezzi.Controllers
             //return StatusCode(500);
             return Ok(list);
         }
+        [Route("ListDisponibili")]
+        [HttpGet]
+        public IActionResult ListDisponibili()
+        {
+            AutomezziRepository _repo = new AutomezziRepository();
+
+            List<Automezzo> list = _repo.ListAutomezziDisponibili();
+
+            //return StatusCode(500);
+            return Ok(list);
+        }
 
         public static HttpResponseMessage CreateResponse<T>(HttpRequest requestMessage, HttpStatusCode statusCode, T content)
         {
@@ -66,11 +77,11 @@ namespace NoleggioAutomezzi.Controllers
                 if (!_repo.UpdateAutomezzo(automezzo))
                     throw new InvalidModelException();
             }
-            catch (InvalidModelException e)
+            catch (InvalidModelException)
             {
                 return StatusCode(400); //Bad Request
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500); //InternalServerError
             }
