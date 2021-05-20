@@ -1,10 +1,7 @@
 ﻿using NoleggioAutomezzi.Models;
-using NoleggioAutomezzi.Models.Full;
 using NoleggioAutomezzi.Repository;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace NoleggioAutomezzi.Repositories
 {
@@ -27,8 +24,8 @@ namespace NoleggioAutomezzi.Repositories
             Utente utente = _repoUtenti.GetUtenteById(idUtente);
             if (utente.hasPermessi)
             {
-                List<PrenotazioneFull> prenotazioniDaGestire = _repoPrenotazioni.ListPrenotazioniFullDaGestire(null);
-                foreach(PrenotazioneFull prenotazione in prenotazioniDaGestire)
+                List<Prenotazione> prenotazioniDaGestire = _repoPrenotazioni.ListPrenotazioniDaGestire(null);
+                foreach(Prenotazione prenotazione in prenotazioniDaGestire)
                 {
                     string messaggio = string.Format("La prenotazione dell'utente {0} per l'automezzo {1} {2} targato {3}" +
                         " dal {4} al {5} è in attesa di approvazione.",
@@ -43,9 +40,9 @@ namespace NoleggioAutomezzi.Repositories
             }
             else
             {
-                List<PrenotazioneFull> prenotazioni = _repoPrenotazioni.ListPrenotazioniFull(utente.id);
+                List<Prenotazione> prenotazioni = _repoPrenotazioni.ListPrenotazioni(utente.id);
                 prenotazioni = prenotazioni.OrderBy(prenotazione => prenotazione.stato).ToList();
-                foreach (PrenotazioneFull prenotazione in prenotazioni)
+                foreach (Prenotazione prenotazione in prenotazioni)
                 {
                     if(prenotazione.stato == 0)
                     {

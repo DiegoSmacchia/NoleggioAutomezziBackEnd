@@ -1,7 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using NoleggioAutomezzi.Exceptions;
 using NoleggioAutomezzi.Models;
-using NoleggioAutomezzi.Models.Full;
 using System;
 using System.Collections.Generic;
 
@@ -21,9 +20,9 @@ namespace NoleggioAutomezzi.Repository
             _repoAutomezzi = new AutomezziRepository();
         }
 
-        public List<PrenotazioneFull> ListPrenotazioniFull(int? idUtente)
+        public List<Prenotazione> ListPrenotazioni(int? idUtente)
         {
-            List<PrenotazioneFull> list = new List<PrenotazioneFull>();
+            List<Prenotazione> list = new List<Prenotazione>();
             string queryString = "SELECT * FROM Prenotazioni";
             if (idUtente.HasValue && _repoUtenti.ExistsUtenteById(idUtente.Value))
                 queryString += string.Format(" WHERE IdUtente = {0}", idUtente.Value);
@@ -36,7 +35,7 @@ namespace NoleggioAutomezzi.Repository
             {
                 while (reader.Read())
                 {
-                    PrenotazioneFull prenotazione = FillPrenotazioneFull(reader);
+                    Prenotazione prenotazione = FillPrenotazione(reader);
                     list.Add(prenotazione);
                 }
             }
@@ -48,9 +47,9 @@ namespace NoleggioAutomezzi.Repository
             return list;
         }
 
-        public List<PrenotazioneFull> ListPrenotazioniFullDaGestire(int? idUtente)
+        public List<Prenotazione> ListPrenotazioniDaGestire(int? idUtente)
         {
-            List<PrenotazioneFull> list = new List<PrenotazioneFull>();
+            List<Prenotazione> list = new List<Prenotazione>();
             string queryString = "SELECT * FROM Prenotazioni WHERE stato = 0";
             if (idUtente.HasValue && _repoUtenti.ExistsUtenteById(idUtente.Value))
                 queryString += string.Format(" AND IdUtente = {0}", idUtente.Value);
@@ -63,7 +62,7 @@ namespace NoleggioAutomezzi.Repository
             {
                 while (reader.Read())
                 {
-                    PrenotazioneFull prenotazione = FillPrenotazioneFull(reader);
+                    Prenotazione prenotazione = FillPrenotazione(reader);
                     list.Add(prenotazione);
                 }
             }
@@ -74,28 +73,6 @@ namespace NoleggioAutomezzi.Repository
             }
             return list;
         }
-        public PrenotazioneFull GetPrenotazioneFullById(int id)
-        {
-            PrenotazioneFull prenotazione = null;
-            string queryString = string.Format("SELECT * FROM Prenotazioni WHERE Id = {0};", id);
-
-            SqliteConnection connection = _repoDatabase.Connect();
-            SqliteCommand command = new SqliteCommand(queryString, connection);
-
-            SqliteDataReader reader = command.ExecuteReader();
-            try
-            {
-                if (reader.Read())
-                    prenotazione = FillPrenotazioneFull(reader);
-            }
-            finally
-            {
-                reader.Close();
-                _repoDatabase.Close(connection);
-            }
-            return prenotazione;
-        }
-
         public Prenotazione GetPrenotazioneById(int id)
         {
             Prenotazione prenotazione = null;
@@ -123,8 +100,8 @@ namespace NoleggioAutomezzi.Repository
             validatePrenotazione(prenotazione, true);
 
             string queryString = string.Format("INSERT INTO Prenotazioni(IdAutomezzo,IdUtente,DataInizio,DataFine,Stato) values({0},{1},'{2}','{3}', 0);",
-                prenotazione.idAutomezzo,
-                prenotazione.idUtente,
+                prenotazione.automezzo.id,
+                prenotazione.utente.id,
                 prenotazione.dataInizio.ToString("yyyy-MM-dd"),
                 prenotazione.dataFine.ToString("yyyy-MM-dd"));
 
@@ -138,8 +115,8 @@ namespace NoleggioAutomezzi.Repository
             _repoDatabase.Close(connection);
             if (result)
             {
-                Utente utente = _repoUtenti.GetUtenteById(prenotazione.idUtente);
-                Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(prenotazione.idAutomezzo);
+                Utente utente = _repoUtenti.GetUtenteById(prenotazione.utente.id);
+                Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(prenotazione.automezzo.id);
                 //Invio una mail al cliente per informarlo dell'avvenuta richiesta di prenotazione.
                 _repoMail.SendMail(utente.indirizzoEmail, "Richiesta di Prenotazione effettuata", string.Format(
                     "Ciao {0}," +
@@ -171,8 +148,8 @@ namespace NoleggioAutomezzi.Repository
             validatePrenotazione(prenotazione, false);
             Prenotazione old = GetPrenotazioneById(prenotazione.id); 
             string queryString = string.Format("UPDATE Prenotazioni SET IdAutomezzo = {0},IdUtente = {1}, DataInizio = '{2}', DataFine = '{3}' WHERE Id = {4}" ,
-                prenotazione.idAutomezzo,
-                prenotazione.idUtente,
+                prenotazione.automezzo.id,
+                prenotazione.utente.id,
                 prenotazione.dataInizio.ToString("yyyy-MM-dd"),
                 prenotazione.dataFine.ToString("yyyy-MM-dd"),
                 prenotazione.id);
@@ -211,8 +188,8 @@ namespace NoleggioAutomezzi.Repository
                 if (result)
                 {
                     Prenotazione prenotazione = GetPrenotazioneById(idPrenotazione);
-                    Utente utente = _repoUtenti.GetUtenteById(prenotazione.idUtente);
-                    Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(prenotazione.idAutomezzo);
+                    Utente utente = _repoUtenti.GetUtenteById(prenotazione.utente.id);
+                    Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(prenotazione.automezzo.id);
                     //Invio una mail al cliente per informarlo dell'accettazione della sua prenotazione.
                     _repoMail.SendMail(utente.indirizzoEmail, "Prenotazione Accettata", string.Format(
                         "Ciao {0}," +
@@ -250,8 +227,8 @@ namespace NoleggioAutomezzi.Repository
                 if (result)
                 {
                     Prenotazione prenotazione = GetPrenotazioneById(idPrenotazione);
-                    Utente utente = _repoUtenti.GetUtenteById(prenotazione.idUtente);
-                    Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(prenotazione.idAutomezzo);
+                    Utente utente = _repoUtenti.GetUtenteById(prenotazione.utente.id);
+                    Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(prenotazione.automezzo.id);
                     //Invio una mail al cliente per informarlo dell'accettazione della sua prenotazione.
                     _repoMail.SendMail(utente.indirizzoEmail, "Prenotazione Rifiutata", string.Format(
                         "Ciao {0}," +
@@ -288,10 +265,10 @@ namespace NoleggioAutomezzi.Repository
         private bool validatePrenotazione(Prenotazione prenotazione, bool insertMode)
         {
             bool ok = true;
-            if (prenotazione.idAutomezzo <= 0)
+            if (prenotazione.automezzo.id <= 0)
                 ok = false;
             else
-                if (prenotazione.idUtente <= 0)
+                if (prenotazione.utente.id <= 0)
                     ok = false;
                 else
                     if (prenotazione.dataInizio == null || prenotazione.dataInizio < DateTime.Today)
@@ -321,7 +298,7 @@ namespace NoleggioAutomezzi.Repository
         {
             bool found = false;
             string queryString = string.Format("SELECT * FROM Prenotazioni WHERE IdAutomezzo = {0} AND (DataInizio >= '{1}' OR dataFine <= '{2}') AND Id != {3};",
-                prenotazione.idAutomezzo, 
+                prenotazione.utente.id, 
                 prenotazione.dataInizio, 
                 prenotazione.dataFine, 
                 prenotazione.id);
@@ -366,18 +343,6 @@ namespace NoleggioAutomezzi.Repository
         private Prenotazione FillPrenotazione(SqliteDataReader reader)
         {
             Prenotazione prenotazione = new Prenotazione();
-            prenotazione.id = int.Parse(reader["Id"].ToString());
-            prenotazione.idAutomezzo = int.Parse(reader["IdAutomezzo"].ToString());
-            prenotazione.idUtente = int.Parse(reader["IdUtente"].ToString());
-            prenotazione.dataInizio = DateTime.Parse(reader["DataInizio"].ToString());
-            prenotazione.dataFine = DateTime.Parse(reader["DataFine"].ToString());
-            prenotazione.stato = int.Parse(reader["Stato"].ToString());
-
-            return prenotazione;
-        }
-        private PrenotazioneFull FillPrenotazioneFull(SqliteDataReader reader)
-        {
-            PrenotazioneFull prenotazione = new PrenotazioneFull();
             prenotazione.id = int.Parse(reader["Id"].ToString());
             prenotazione.automezzo = _repoAutomezzi.GetAutomezzoById(int.Parse(reader["IdAutomezzo"].ToString()));
             prenotazione.utente = _repoUtenti.GetUtenteById(int.Parse(reader["IdUtente"].ToString()));

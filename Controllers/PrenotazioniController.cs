@@ -1,15 +1,10 @@
 ﻿using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using NoleggioAutomezzi.Exceptions;
 using NoleggioAutomezzi.Models;
-using NoleggioAutomezzi.Models.Full;
 using NoleggioAutomezzi.Repository;
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
 
 namespace NoleggioAutomezzi.Controllers
 {
@@ -25,7 +20,7 @@ namespace NoleggioAutomezzi.Controllers
         {
             PrenotazioniRepository _repo = new PrenotazioniRepository();
 
-            List<PrenotazioneFull> list = _repo.ListPrenotazioniFull(null);
+            List<Prenotazione> list = _repo.ListPrenotazioni(null);
 
             return Ok(list);
         }
@@ -35,7 +30,7 @@ namespace NoleggioAutomezzi.Controllers
         {
             PrenotazioniRepository _repo = new PrenotazioniRepository();
 
-            List<PrenotazioneFull> list = _repo.ListPrenotazioniFull(idUtente);
+            List<Prenotazione> list = _repo.ListPrenotazioni(idUtente);
 
             return Ok(list);
         }
@@ -49,8 +44,10 @@ namespace NoleggioAutomezzi.Controllers
             try
             {
                 prenotazione.id = int.Parse(Request.Form["id"].ToString());
-                prenotazione.idUtente = int.Parse(Request.Form["idUtente"].ToString());
-                prenotazione.idAutomezzo = int.Parse(Request.Form["idAutomezzo"].ToString());
+                prenotazione.utente = new Utente();
+                prenotazione.utente.id = int.Parse(Request.Form["idUtente"].ToString());
+                prenotazione.automezzo = new Automezzo();
+                prenotazione.automezzo.id = int.Parse(Request.Form["idAutomezzo"].ToString());
                 prenotazione.dataInizio = DateTime.Parse(Request.Form["dataInizio"].ToString());
                 prenotazione.dataFine = DateTime.Parse(Request.Form["dataFine"].ToString());
                 prenotazione.stato = int.Parse(Request.Form["stato"].ToString());

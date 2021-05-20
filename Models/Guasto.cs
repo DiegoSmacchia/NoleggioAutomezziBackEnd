@@ -5,13 +5,12 @@ using System.Threading.Tasks;
 
 namespace NoleggioAutomezzi.Models
 {
-    public class Prenotazione
+    public class Guasto
     {
         public int id { get; set; }
-        public Utente utente { get; set; }
         public Automezzo automezzo { get; set; }
-        public DateTime dataInizio { get; set; }
-        public DateTime dataFine { get; set; }
-        public int stato { get; set; }
+        public Utente Utente { get; set; }
+        public string Descrizione { get; set; }
+        public DateTime data { get; set; }
     }
 }
