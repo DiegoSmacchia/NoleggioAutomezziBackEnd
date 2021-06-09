@@ -191,7 +191,7 @@ namespace NoleggioAutomezzi.Repository
             }
             return found;
         }
-        private bool ExistsAutomezzoById(int id)
+        public bool ExistsAutomezzoById(int id)
         {
             bool found = false;
             string queryString = string.Format("SELECT * FROM Automezzi WHERE Id = {0};", id);

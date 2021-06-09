@@ -11,5 +11,10 @@ namespace NoleggioAutomezzi.Models
         public Prenotazione prenotazione { get; set; }
         public decimal importo { get; set; }
         public DateTime data { get; set; }
+
+        public Multa()
+        {
+            this.prenotazione = new Prenotazione();
+        }
     }
 }

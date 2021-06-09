@@ -13,5 +13,11 @@ namespace NoleggioAutomezzi.Models
         public DateTime dataInizio { get; set; }
         public DateTime dataFine { get; set; }
         public int stato { get; set; }
+
+        public Prenotazione()
+        {
+            this.utente = new Utente();
+            this.automezzo = new Automezzo();
+        }
     }
 }

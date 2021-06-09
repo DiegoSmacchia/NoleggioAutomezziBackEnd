@@ -75,7 +75,6 @@ D:\uni\old\NoleggioAutomezziBackEnd\bin\Debug\netcoreapp3.1\runtimes\win-arm\nat
 D:\uni\old\NoleggioAutomezziBackEnd\bin\Debug\netcoreapp3.1\runtimes\win-arm64\native\e_sqlite3.dll
 D:\uni\old\NoleggioAutomezziBackEnd\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\e_sqlite3.dll
 D:\uni\old\NoleggioAutomezziBackEnd\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\e_sqlite3.dll
-D:\uni\old\NoleggioAutomezziBackEnd\obj\Debug\netcoreapp3.1\NoleggioAutomezzi.csprojAssemblyReference.cache
 D:\uni\old\NoleggioAutomezziBackEnd\obj\Debug\netcoreapp3.1\NoleggioAutomezzi.AssemblyInfoInputs.cache
 D:\uni\old\NoleggioAutomezziBackEnd\obj\Debug\netcoreapp3.1\NoleggioAutomezzi.AssemblyInfo.cs
 D:\uni\old\NoleggioAutomezziBackEnd\obj\Debug\netcoreapp3.1\NoleggioAutomezzi.csproj.CoreCompileInputs.cache
@@ -88,3 +87,4 @@ D:\uni\old\NoleggioAutomezziBackEnd\obj\Debug\netcoreapp3.1\NoleggioAutomezzi.cs
 D:\uni\old\NoleggioAutomezziBackEnd\obj\Debug\netcoreapp3.1\NoleggioAutomezzi.dll
 D:\uni\old\NoleggioAutomezziBackEnd\obj\Debug\netcoreapp3.1\NoleggioAutomezzi.pdb
 D:\uni\old\NoleggioAutomezziBackEnd\obj\Debug\netcoreapp3.1\NoleggioAutomezzi.genruntimeconfig.cache
+D:\uni\old\NoleggioAutomezziBackEnd\obj\Debug\netcoreapp3.1\NoleggioAutomezzi.csproj.AssemblyReference.cache

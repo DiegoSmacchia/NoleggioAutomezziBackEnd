@@ -44,9 +44,7 @@ namespace NoleggioAutomezzi.Controllers
             try
             {
                 prenotazione.id = int.Parse(Request.Form["id"].ToString());
-                prenotazione.utente = new Utente();
                 prenotazione.utente.id = int.Parse(Request.Form["idUtente"].ToString());
-                prenotazione.automezzo = new Automezzo();
                 prenotazione.automezzo.id = int.Parse(Request.Form["idAutomezzo"].ToString());
                 prenotazione.dataInizio = DateTime.Parse(Request.Form["dataInizio"].ToString());
                 prenotazione.dataFine = DateTime.Parse(Request.Form["dataFine"].ToString());

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NoleggioAutomezzi.Models
 {
@@ -9,8 +6,14 @@ namespace NoleggioAutomezzi.Models
     {
         public int id { get; set; }
         public Automezzo automezzo { get; set; }
-        public Utente Utente { get; set; }
-        public string Descrizione { get; set; }
+        public Utente utente { get; set; }
+        public string descrizione { get; set; }
         public DateTime data { get; set; }
+
+        public Guasto()
+        {
+            this.automezzo = new Automezzo();
+            this.utente = new Utente();
+        }
     }
 }

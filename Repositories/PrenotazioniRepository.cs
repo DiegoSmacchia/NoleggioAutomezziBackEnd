@@ -97,7 +97,8 @@ namespace NoleggioAutomezzi.Repository
 
         public bool InsertPrenotazione(Prenotazione prenotazione)
         {
-            validatePrenotazione(prenotazione, true);
+            bool result = false;
+            ValidatePrenotazione(prenotazione, true);
 
             string queryString = string.Format("INSERT INTO Prenotazioni(IdAutomezzo,IdUtente,DataInizio,DataFine,Stato) values({0},{1},'{2}','{3}', 0);",
                 prenotazione.automezzo.id,
@@ -108,44 +109,24 @@ namespace NoleggioAutomezzi.Repository
             SqliteConnection connection = _repoDatabase.Connect();
             SqliteCommand command = new SqliteCommand(queryString, connection);
 
-            int res = command.ExecuteNonQuery();
-            bool result = res == 1 ? true : false;
-
-            
-            _repoDatabase.Close(connection);
-            if (result)
+            try
             {
-                Utente utente = _repoUtenti.GetUtenteById(prenotazione.utente.id);
-                Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(prenotazione.automezzo.id);
-                //Invio una mail al cliente per informarlo dell'avvenuta richiesta di prenotazione.
-                _repoMail.SendMail(utente.indirizzoEmail, "Richiesta di Prenotazione effettuata", string.Format(
-                    "Ciao {0}," +
-                    "\nAbbiamo ricevuto la tua richiesta di prenotazione per il mezzo {1} {2} dal giorno {3} al giorno {4}." +
-                    "\nRiceverai una nuova mail quando la tua prenotazione verrà accettata o rifiutata.",
-                    utente.nome,
-                    automezzo.marca,
-                    automezzo.modello,
-                    prenotazione.dataInizio.ToString("dd/MM/yyyy"),
-                    prenotazione.dataFine.ToString("dd/MM/yyyy")));
-
-                //Invio una mail anche ad admin, l'utente con id 1.
-                Utente admin = _repoUtenti.GetUtenteById(1);
-                _repoMail.SendMail(admin.indirizzoEmail, "Nuova Richiesta di Prenotazione", string.Format(
-                    "L'utente {0} ha effettuato una richiesta di prenotazione per il mezzo {1} {2} targato {3} dal giorno {4} al giorno {5}.",
-                    utente.username,
-                    automezzo.marca,
-                    automezzo.modello,
-                    automezzo.targa,
-                    prenotazione.dataInizio.ToString("dd/MM/yyyy"),
-                    prenotazione.dataFine.ToString("dd/MM/yyyy")));
+                int res = command.ExecuteNonQuery();
+                result = res == 1 ? true : false;
             }
-            else
+            finally
+            {
+                _repoDatabase.Close(connection);
+            }
+            
+            if(!result)
                 throw new OperationFailedException();
             return result;
         }
         public bool EditPrenotazione(Prenotazione prenotazione)
         {
-            validatePrenotazione(prenotazione, false);
+            bool result = false;
+            ValidatePrenotazione(prenotazione, false);
             Prenotazione old = GetPrenotazioneById(prenotazione.id); 
             string queryString = string.Format("UPDATE Prenotazioni SET IdAutomezzo = {0},IdUtente = {1}, DataInizio = '{2}', DataFine = '{3}' WHERE Id = {4}" ,
                 prenotazione.automezzo.id,
@@ -157,14 +138,45 @@ namespace NoleggioAutomezzi.Repository
             SqliteConnection connection = _repoDatabase.Connect();
             SqliteCommand command = new SqliteCommand(queryString, connection);
 
-            int res = command.ExecuteNonQuery();
-            bool result = res == 1 ? true : false;
-
-            _repoDatabase.Close(connection);
+            try
+            {
+                int res = command.ExecuteNonQuery();
+                result = res == 1 ? true : false;
+            }
+            finally
+            {
+                _repoDatabase.Close(connection);
+            }
 
             if (result)
             {
-                //TODO: mail avvenuta modifica
+                Utente utente = _repoUtenti.GetUtenteById(prenotazione.utente.id);
+                Utente admin = _repoUtenti.GetUtenteById(1);
+                Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(prenotazione.automezzo.id);
+                //Invio una mail al cliente
+                _repoMail.SendMail(utente.indirizzoEmail, "Prenotazione Modificata", string.Format(
+                    "Ciao {0}," +
+                    "\nLa tua prenotazione è stata modificata, i nuovi dati sono i seguenti:\n" +
+                    "Automezzo: {1} {2}\n" +
+                    "Data inizio prenotazione: {3}\n" + 
+                    "Data fine prenotazione: {4}\n",
+                    utente.nome,
+                    automezzo.marca,
+                    automezzo.modello,
+                    prenotazione.dataInizio.ToString("dd/MM/yyyy"),
+                    prenotazione.dataFine.ToString("dd/MM/yyyy")));
+                //Invio una mail ad admin
+                _repoMail.SendMail(admin.indirizzoEmail, "Prenotazione Modificata", string.Format(
+                    "La prenotazione dell'utente {0} è stata modificata, i nuovi dati sono i seguenti:\n" +
+                    "Automezzo: {1} {2} {3}\n" +
+                    "Data inizio prenotazione: {4}\n" +
+                    "Data fine prenotazione: {5}\n",
+                    utente.username,
+                    automezzo.marca,
+                    automezzo.modello,
+                    automezzo.targa,
+                    prenotazione.dataInizio.ToString("dd/MM/yyyy"),
+                    prenotazione.dataFine.ToString("dd/MM/yyyy")));
             }
             else
                 throw new OperationFailedException();
@@ -181,9 +193,15 @@ namespace NoleggioAutomezzi.Repository
                 SqliteConnection connection = _repoDatabase.Connect();
                 SqliteCommand command = new SqliteCommand(queryString, connection);
 
-                int res = command.ExecuteNonQuery();
-                result = res == 1 ? true : false;
-                _repoDatabase.Close(connection);
+                try
+                {
+                    int res = command.ExecuteNonQuery();
+                    result = res == 1 ? true : false;
+                }
+                finally
+                {
+                    _repoDatabase.Close(connection);
+                }
 
                 if (result)
                 {
@@ -220,9 +238,15 @@ namespace NoleggioAutomezzi.Repository
                 SqliteConnection connection = _repoDatabase.Connect();
                 SqliteCommand command = new SqliteCommand(queryString, connection);
 
-                int res = command.ExecuteNonQuery();
-                result = res == 1 ? true : false;
-                _repoDatabase.Close(connection);
+                try
+                {
+                    int res = command.ExecuteNonQuery();
+                    result = res == 1 ? true : false;
+                }
+                finally
+                {
+                    _repoDatabase.Close(connection);
+                }
 
                 if (result)
                 {
@@ -262,7 +286,24 @@ namespace NoleggioAutomezzi.Repository
 
             return updated;
         }
-        private bool validatePrenotazione(Prenotazione prenotazione, bool insertMode)
+        public bool DeletePrenotazione(int id)
+        {            
+            string queryString = string.Format("DELETE FROM Prenotazioni WHERE Id = {0}", id);
+
+            SqliteConnection connection = _repoDatabase.Connect();
+            SqliteCommand command = new SqliteCommand(queryString, connection);
+
+            try
+            {
+                int res = command.ExecuteNonQuery();
+            }
+            finally
+            {
+                _repoDatabase.Close(connection);
+            }
+            return ExistsPrenotazioneById(id);
+        }
+        private bool ValidatePrenotazione(Prenotazione prenotazione, bool insertMode)
         {
             bool ok = true;
             if (prenotazione.automezzo.id <= 0)
