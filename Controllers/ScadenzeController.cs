@@ -51,7 +51,7 @@ namespace NoleggioAutomezzi.Controllers
             try
             {
                 scadenza.id = int.Parse(Request.Form["id"].ToString());
-                scadenza.scadenza = Request.Form["dataInizio"].ToString();
+                scadenza.scadenza = Request.Form["scadenza"].ToString();
 
                 _repo.UpdateScadenza(scadenza);
             }

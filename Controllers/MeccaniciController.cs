@@ -54,5 +54,33 @@ namespace NoleggioAutomezzi.Controllers
             return Ok(meccanico);
         }
 
+        [Route("DeleteMeccanico")]
+        [HttpPost]
+        public IActionResult DeleteMeccanico()
+        {
+            MeccaniciRepository _repo = new MeccaniciRepository();
+            int id = 0;
+            int result = 0;
+            try
+            {
+                id = int.Parse(Request.Form["id"].ToString());
+                
+
+                bool deleted = _repo.DeleteMeccanico(id);
+                result = deleted ? 200 : 409; //409 = Conflict, il meccanico non può essere eliminato perché c'è almeno un intervento collegato
+
+            }
+            catch (OperationFailedException)
+            {
+                return StatusCode(400); //Bad Request
+            }
+            catch (Exception)
+            {
+                return StatusCode(500); //InternalServerError
+            }
+
+            return StatusCode(result);
+        }
+
     }
 }

@@ -99,7 +99,7 @@ namespace NoleggioAutomezzi.Controllers
                 guasto.id = int.Parse(Request.Form["id"].ToString());
                 guasto.automezzo.id = int.Parse(Request.Form["idAutomezzo"].ToString());
                 guasto.utente.id = int.Parse(Request.Form["idUtente"].ToString());
-                guasto.descrizione = Request.Form["idGuasto"].ToString();
+                guasto.descrizione = Request.Form["descrizione"].ToString();
                 guasto.data = DateTime.Parse(Request.Form["data"].ToString());
 
                 _repo.UpdateGuasto(guasto);

@@ -20,7 +20,18 @@ namespace NoleggioAutomezzi.Controllers
         {
             MulteRepository _repo = new MulteRepository();
 
-            List<Multa> list = _repo.ListMulte();
+            List<Multa> list = _repo.ListMulte(null);
+
+            return Ok(list);
+        }
+
+        [Route("ListMulteByIdUtente/")]
+        [HttpGet]
+        public IActionResult ListMulteByIdUtente(int idUtente)
+        {
+            MulteRepository _repo = new MulteRepository();
+
+            List<Multa> list = _repo.ListMulte(idUtente);
 
             return Ok(list);
         }

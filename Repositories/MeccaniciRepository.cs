@@ -131,6 +131,33 @@ namespace NoleggioAutomezzi.Repositories
 
             return updated;
         }
+
+        public bool DeleteMeccanico(int id)
+        {
+            bool result = false;
+            if (CanDeleteMeccanico(id))
+            {
+                string queryString = string.Format("DELETE FROM Meccanici WHERE Id = {0};", id);
+
+                SqliteConnection connection = _repoDatabase.Connect();
+                SqliteCommand command = new SqliteCommand(queryString, connection);
+
+                try
+                {
+                    int res = command.ExecuteNonQuery();
+                    result = res == 1 ? true : false;
+                }
+                finally
+                {
+                    _repoDatabase.Close(connection);
+                }
+
+                if (!result)
+                    throw new OperationFailedException();
+            }
+            
+            return result;
+        }
         private bool ValidateMeccanico(Meccanico meccanico, bool insertMode)
         {
             bool ok = true;
@@ -154,6 +181,30 @@ namespace NoleggioAutomezzi.Repositories
                 throw new InvalidModelException();
 
             return ok;
+        }
+        private bool CanDeleteMeccanico(int id)
+        {
+            bool result = false;
+
+            string queryString = string.Format("SELECT * FROM Interventi WHERE IdMeccanico = {0}", id);
+
+            SqliteConnection connection = _repoDatabase.Connect();
+            SqliteCommand command = new SqliteCommand(queryString, connection);
+
+            SqliteDataReader reader = command.ExecuteReader();
+            try
+            {
+                if (reader.Read())
+                    result = false;
+                else
+                    result = true;
+            }
+            finally
+            {
+                reader.Close();
+                _repoDatabase.Close(connection);
+            }
+            return result;
         }
         private bool ExistsMeccanicoById(int id)
         {

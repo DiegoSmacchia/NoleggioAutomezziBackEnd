@@ -25,10 +25,13 @@ namespace NoleggioAutomezzi.Repositories
             _repoPrenotazioni = new PrenotazioniRepository();
         }
 
-        public List<Multa> ListMulte()
+        public List<Multa> ListMulte(int? idUtente)
         {
             List<Multa> list = new List<Multa>();
             string queryString = "SELECT * FROM Multe";
+            if (idUtente.HasValue && _repoUtenti.ExistsUtenteById(idUtente.Value))
+                queryString += string.Format(" WHERE IdUtente = {0}", idUtente.Value);
+
 
             SqliteConnection connection = _repoDatabase.Connect();
             SqliteCommand command = new SqliteCommand(queryString, connection);
@@ -49,6 +52,8 @@ namespace NoleggioAutomezzi.Repositories
             }
             return list;
         }
+
+       
         public Multa GetMultaById(int id)
         {
             Multa multa = null;
