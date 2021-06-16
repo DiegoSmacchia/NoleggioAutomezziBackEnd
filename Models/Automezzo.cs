@@ -13,7 +13,6 @@ namespace NoleggioAutomezzi.Models
         public string modello { get; set; }
         public string targa { get; set; }
         public int kmAttuali { get; set; }
-        public decimal costo { get; set; }
         public bool mezzoDisponibile { get; set; }
     }
 }

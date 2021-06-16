@@ -70,7 +70,6 @@ namespace NoleggioAutomezzi.Controllers
                 automezzo.marca = Request.Form["marca"].ToString();
                 automezzo.modello = Request.Form["modello"].ToString();
                 automezzo.kmAttuali = int.Parse(Request.Form["kmAttuali"].ToString());
-                automezzo.costo = int.Parse(Request.Form["costo"].ToString());
 
                 
                 AutomezziRepository _repo = new AutomezziRepository();

@@ -338,7 +338,7 @@ namespace NoleggioAutomezzi.Repository
         private bool AutomezzoGiaPrenotato(Prenotazione prenotazione)
         {
             bool found = false;
-            string queryString = string.Format("SELECT * FROM Prenotazioni WHERE IdAutomezzo = {0} AND (DataInizio >= '{1}' OR dataFine <= '{2}') AND Id != {3};",
+            string queryString = string.Format("SELECT * FROM Prenotazioni WHERE IdAutomezzo = {0} AND (DataInizio >= '{1}' AND dataFine <= '{2}') AND Id != {3};",
                 prenotazione.utente.id, 
                 prenotazione.dataInizio, 
                 prenotazione.dataFine, 

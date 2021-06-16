@@ -87,6 +87,18 @@ namespace NoleggioAutomezzi.Repositories
                     
                     
                 }
+                List<Multa> multe = _repoMulte.ListMulte(utente.id);
+                multe = multe.OrderBy(multa => multa.data).ToList();
+                foreach (Multa multa in multe)
+                {
+
+                    string messaggio = string.Format("Hai preso una multa da {0}€ il giorno {1}.",
+                    multa.importo,
+                    multa.data.ToString("dd/MM/yyyy"));
+
+                    notifiche.Add(messaggio);
+
+                }
             }
             return notifiche;
         }

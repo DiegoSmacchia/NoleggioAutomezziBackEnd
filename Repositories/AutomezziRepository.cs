@@ -89,12 +89,11 @@ namespace NoleggioAutomezzi.Repository
         {
             validateAutomezzo(automezzo, true);
             
-            string queryString = string.Format("INSERT INTO Automezzi(Targa, Marca,Modello, KmAttuali, MezzoDisponibile, Costo) values('{0}','{1}','{2}',{3}, 1 , {4});",
+            string queryString = string.Format("INSERT INTO Automezzi(Targa, Marca,Modello, KmAttuali, MezzoDisponibile) values('{0}','{1}','{2}',{3}, 1);",
                 automezzo.targa,
                 automezzo.marca.Replace("'", "''"),
                 automezzo.modello.Replace("'", "''"),
-                automezzo.kmAttuali,
-                automezzo.costo);
+                automezzo.kmAttuali);
 
             SqliteConnection connection = _repoDatabase.Connect();
             SqliteCommand command = new SqliteCommand(queryString, connection);
@@ -110,13 +109,12 @@ namespace NoleggioAutomezzi.Repository
         {
             validateAutomezzo(automezzo, false);
 
-            string queryString = string.Format("UPDATE Automezzi SET Targa = '{0}', Marca = '{1}',Modello = '{2}', KmAttuali = {3}, MezzoDisponibile = {4}, Costo = {5} WHERE Id = {6};",
+            string queryString = string.Format("UPDATE Automezzi SET Targa = '{0}', Marca = '{1}',Modello = '{2}', KmAttuali = {3}, MezzoDisponibile = {4} WHERE Id = {5};",
                 automezzo.targa,
                 automezzo.marca.Replace("'", "''"),
                 automezzo.modello.Replace("'", "''"),
                 automezzo.kmAttuali,
                 automezzo.mezzoDisponibile,
-                automezzo.costo,
                 automezzo.id);
 
             SqliteConnection connection = _repoDatabase.Connect();
@@ -180,9 +178,7 @@ namespace NoleggioAutomezzi.Repository
                     else
                         if (automezzo.kmAttuali < 0)
                             ok = false;
-                        else
-                            if (automezzo.costo <= 0)
-                                ok = false;
+
                             
                                 
             if (insertMode)
@@ -247,7 +243,6 @@ namespace NoleggioAutomezzi.Repository
             automezzo.marca = reader["Marca"].ToString();
             automezzo.modello = reader["Modello"].ToString();
             automezzo.kmAttuali = int.Parse(reader["KmAttuali"].ToString());
-            automezzo.costo = decimal.Parse(reader["Costo"].ToString());
             automezzo.mezzoDisponibile = reader["MezzoDisponibile"].ToString() == "1" ? true : false;
 
             return automezzo;
