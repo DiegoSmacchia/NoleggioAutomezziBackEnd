@@ -17,7 +17,7 @@ namespace NoleggioAutomezzi.Controllers
         [HttpGet]
         public string Welcome()
         {
-            return "Home Page Noleggio Automezzi.";
+            return "Noleggio Automezzi.\nSmacchia Diego, Marticola 294374.";
 
         }
     }
