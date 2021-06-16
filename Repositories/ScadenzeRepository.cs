@@ -131,6 +131,32 @@ namespace NoleggioAutomezzi.Repositories
 
             return updated;
         }
+        public bool DeleteScadenza(int id)
+        {
+            bool result = false;
+            if (CanDeleteScadenza(id))
+            {
+                string queryString = string.Format("DELETE FROM Scadenze WHERE Id = {0};", id);
+
+                SqliteConnection connection = _repoDatabase.Connect();
+                SqliteCommand command = new SqliteCommand(queryString, connection);
+
+                try
+                {
+                    int res = command.ExecuteNonQuery();
+                    result = res == 1 ? true : false;
+                }
+                finally
+                {
+                    _repoDatabase.Close(connection);
+                }
+
+                if (!result)
+                    throw new OperationFailedException();
+            }
+
+            return result;
+        }
         private bool ValidateScadenza(Scadenza scadenza, bool insertMode)
         {
             bool ok = true;
@@ -177,6 +203,30 @@ namespace NoleggioAutomezzi.Repositories
             scadenza.scadenza = reader["Scadenza"].ToString();
 
             return scadenza;
+        }
+        private bool CanDeleteScadenza(int id)
+        {
+            bool result = false;
+
+            string queryString = string.Format("SELECT * FROM AutomezziScadenze WHERE IdScadenza = {0}", id);
+
+            SqliteConnection connection = _repoDatabase.Connect();
+            SqliteCommand command = new SqliteCommand(queryString, connection);
+
+            SqliteDataReader reader = command.ExecuteReader();
+            try
+            {
+                if (reader.Read())
+                    result = false;
+                else
+                    result = true;
+            }
+            finally
+            {
+                reader.Close();
+                _repoDatabase.Close(connection);
+            }
+            return result;
         }
 
         //AutomezzoScadenza
@@ -239,6 +289,7 @@ namespace NoleggioAutomezzi.Repositories
                 scadenza.scadenza.id, 
                 scadenza.dataInizio.ToString("yyyy-MM-dd"), 
                 scadenza.dataFine.HasValue ? "'" + scadenza.dataFine.Value.ToString("yyyy-MM-dd") + "'" : "null",
+                scadenza.kmIniziali.HasValue ? scadenza.kmIniziali.ToString() : "null",
                 scadenza.dataPagamento.HasValue ? "'" + scadenza.dataPagamento.Value.ToString("yyyy-MM-dd") + "'" : "null");
 
             SqliteConnection connection = _repoDatabase.Connect();
@@ -263,18 +314,20 @@ namespace NoleggioAutomezzi.Repositories
             bool result = false;
             ValidateAutomezzoScadenza(scadenza, false);
             AutomezzoScadenza old = GetAutomezzoScadenzaById(scadenza.id);
-            string queryString = string.Format("EDIT AutomezziScadenze SET " +
+            string queryString = string.Format("UPDATE AutomezziScadenze SET " +
                 "IdAutomezzo = {0}," +
                 "IdScadenza = {1}," +
                 "DataInizio = '{2}'," +
                 "DataFine = {3}," +
                 "KmIniziali = {4}," +
-                "DataPagamento = {5};",
+                "DataPagamento = {5} WHERE Id = {6}",
                 scadenza.automezzo.id,
                 scadenza.scadenza.id,
                 scadenza.dataInizio.ToString("yyyy-MM-dd"),
                 scadenza.dataFine.HasValue ? "'" + scadenza.dataFine.Value.ToString("yyyy-MM-dd") + "'" : "null",
-                scadenza.dataPagamento.HasValue ? "'" + scadenza.dataPagamento.Value.ToString("yyyy-MM-dd") + "'" : "null");
+                scadenza.kmIniziali.HasValue ? scadenza.kmIniziali.ToString() : "null",
+                scadenza.dataPagamento.HasValue ? "'" + scadenza.dataPagamento.Value.ToString("yyyy-MM-dd") + "'" : "null",
+                scadenza.id);
 
             SqliteConnection connection = _repoDatabase.Connect();
             SqliteCommand command = new SqliteCommand(queryString, connection);
@@ -306,6 +359,29 @@ namespace NoleggioAutomezzi.Repositories
                 throw new OperationFailedException();
 
             return updated;
+        }
+        public bool DeleteAutomezzoScadenza(int id)
+        {
+            bool result = false;
+            string queryString = string.Format("DELETE FROM AutomezziScadenze WHERE Id = {0};", id);
+
+            SqliteConnection connection = _repoDatabase.Connect();
+            SqliteCommand command = new SqliteCommand(queryString, connection);
+
+            try
+            {
+                int res = command.ExecuteNonQuery();
+                result = res == 1 ? true : false;
+            }
+            finally
+            {
+                _repoDatabase.Close(connection);
+            }
+
+            if (!result)
+                throw new OperationFailedException();
+
+            return result;
         }
         private bool ValidateAutomezzoScadenza(AutomezzoScadenza scadenza, bool insertMode)
         {
@@ -355,13 +431,28 @@ namespace NoleggioAutomezzi.Repositories
         private AutomezzoScadenza FillAutomezzoScadenza(SqliteDataReader reader)
         {
             AutomezzoScadenza scadenza = new AutomezzoScadenza();
+            int km;
+            DateTime datafine, datapagamento;
+
             scadenza.id = int.Parse(reader["Id"].ToString());
             scadenza.scadenza = GetScadenzaById(int.Parse(reader["IdScadenza"].ToString()));
             scadenza.automezzo = _repoAutomezzi.GetAutomezzoById(int.Parse(reader["IdAutomezzo"].ToString()));
             scadenza.dataInizio = DateTime.Parse(reader["DataInizio"].ToString());
-            scadenza.dataFine = DateTime.Parse(reader["DataFine"].ToString());
-            scadenza.kmIniziali = int.Parse(reader["KmIniziali"].ToString());
-            scadenza.dataPagamento = DateTime.Parse(reader["DataPagamento"].ToString());
+
+            if (DateTime.TryParse(reader["DataFine"].ToString(), out datafine))
+                scadenza.dataFine = datafine;
+            else
+                scadenza.dataFine = null;
+
+            if (int.TryParse(reader["KmIniziali"].ToString(), out km))
+                scadenza.kmIniziali = km;
+            else
+                scadenza.kmIniziali = null;
+
+            if (DateTime.TryParse(reader["DataPagamento"].ToString(), out datapagamento))
+                scadenza.dataPagamento = datapagamento;
+            else
+                scadenza.dataPagamento = null;
 
             return scadenza;
         }

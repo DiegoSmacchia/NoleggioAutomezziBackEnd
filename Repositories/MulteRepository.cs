@@ -30,7 +30,7 @@ namespace NoleggioAutomezzi.Repositories
             List<Multa> list = new List<Multa>();
             string queryString = "SELECT * FROM Multe";
             if (idUtente.HasValue && _repoUtenti.ExistsUtenteById(idUtente.Value))
-                queryString += string.Format(" WHERE IdUtente = {0}", idUtente.Value);
+                queryString += string.Format(" inner join Prenotazioni on Prenotazioni.Id = Multe.IdPrenotazione WHERE Prenotazioni.IdUtente = {0}", idUtente.Value);
 
 
             SqliteConnection connection = _repoDatabase.Connect();
@@ -52,8 +52,6 @@ namespace NoleggioAutomezzi.Repositories
             }
             return list;
         }
-
-       
         public Multa GetMultaById(int id)
         {
             Multa multa = null;
@@ -92,6 +90,25 @@ namespace NoleggioAutomezzi.Repositories
             {
                 int res = command.ExecuteNonQuery();
                 result = res == 1 ? true : false;
+                if (result)
+                {
+                    //Invio una mail all'utente che ha preso la multa
+                    Prenotazione prenotazione = _repoPrenotazioni.GetPrenotazioneById(multa.prenotazione.id);
+                    _repoMail.SendMail(prenotazione.utente.indirizzoEmail, "Multa Ricevuta", string.Format(
+                        "Buongiorno {0},\n" +
+                        "E' stata inserita una multa collegata alla sua prenotazione:\n" +
+                        "Automezzo: {1} {2} {3}\n" +
+                        "Data inizio prenotazione: {4}\n" +
+                        "Data fine prenotazione: {5}\n" +
+                        "L'importo della multa è di {6}€.",
+                        prenotazione.utente.username,
+                        prenotazione.automezzo.marca,
+                        prenotazione.automezzo.modello,
+                        prenotazione.automezzo.targa,
+                        prenotazione.dataInizio.ToString("dd/MM/yyyy"),
+                        prenotazione.dataFine.ToString("dd/MM/yyyy"),
+                        multa.importo));
+                }
             }
             finally
             {

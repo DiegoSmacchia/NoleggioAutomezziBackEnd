@@ -140,6 +140,32 @@ namespace NoleggioAutomezzi.Repository
 
             return updated;
         }
+        public bool DeleteAutomezzo(int id)
+        {
+            bool result = false;
+            if (CanDeleteAutomezzo(id))
+            {
+                string queryString = string.Format("DELETE FROM Automezzi WHERE Id = {0};", id);
+
+                SqliteConnection connection = _repoDatabase.Connect();
+                SqliteCommand command = new SqliteCommand(queryString, connection);
+
+                try
+                {
+                    int res = command.ExecuteNonQuery();
+                    result = res == 1 ? true : false;
+                }
+                finally
+                {
+                    _repoDatabase.Close(connection);
+                }
+
+                if (!result)
+                    throw new OperationFailedException();
+            }
+
+            return result;
+        }
         private bool validateAutomezzo(Automezzo automezzo, bool insertMode)
         {
             bool ok = true;
@@ -225,6 +251,40 @@ namespace NoleggioAutomezzi.Repository
             automezzo.mezzoDisponibile = reader["MezzoDisponibile"].ToString() == "1" ? true : false;
 
             return automezzo;
+        }
+        private bool CanDeleteAutomezzo(int id)
+        {
+            bool result = false;
+
+            string queryString = string.Format("SELECT Prenotazioni.*, Interventi.* " +
+                                               "FROM Prenotazioni " +
+                                               "LEFT JOIN Interventi " +
+                                               "ON Prenotazioni.IdAutomezzo = Interventi.IdAutomezzo " +
+                                               "WHERE Prenotazioni.IdAutomezzo = {0} " +
+                                               "UNION ALL " +
+                                               "SELECT Interventi.*, Prenotazioni.* " +
+                                               "FROM Interventi " +
+                                               "LEFT JOIN Prenotazioni " +
+                                               "ON Interventi.IdAutomezzo = Prenotazioni.IdAutomezzo " +
+                                               "WHERE Interventi.IdAutomezzo = {0}", id);
+
+            SqliteConnection connection = _repoDatabase.Connect();
+            SqliteCommand command = new SqliteCommand(queryString, connection);
+
+            SqliteDataReader reader = command.ExecuteReader();
+            try
+            {
+                if (reader.Read())
+                    result = false;
+                else
+                    result = true;
+            }
+            finally
+            {
+                reader.Close();
+                _repoDatabase.Close(connection);
+            }
+            return result;
         }
     }
 }

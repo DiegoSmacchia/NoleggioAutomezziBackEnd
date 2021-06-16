@@ -25,9 +25,31 @@ namespace NoleggioAutomezzi.Controllers
         {
             NotificheRepository _repo = new NotificheRepository();
 
-            List<string> notifiche = _repo.listNotifiche(idUtente);
+            List<string> notifiche = _repo.ListNotifiche(idUtente);
 
             return Ok(notifiche);
+        }
+
+        [Route("ListValoriAdmin")]
+        [HttpGet]
+        public IActionResult ListValoriAdmin()
+        {
+            NotificheRepository _repo = new NotificheRepository();
+
+            List<int> valori = _repo.ListValoriAdmin();
+
+            return Ok(valori);
+        }
+
+        [Route("ListValoriUtente/{idUtente}")]
+        [HttpGet]
+        public IActionResult ListValoriUtente(int idUtente)
+        {
+            NotificheRepository _repo = new NotificheRepository();
+
+            List<int> valori = _repo.ListValoriUtente(idUtente);
+
+            return Ok(valori);
         }
     }
 }

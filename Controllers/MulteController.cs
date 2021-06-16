@@ -25,7 +25,7 @@ namespace NoleggioAutomezzi.Controllers
             return Ok(list);
         }
 
-        [Route("ListMulteByIdUtente/")]
+        [Route("ListMulteByIdUtente/{idUtente}")]
         [HttpGet]
         public IActionResult ListMulteByIdUtente(int idUtente)
         {
@@ -55,7 +55,7 @@ namespace NoleggioAutomezzi.Controllers
             {
                 return StatusCode(400); //Bad Request
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return StatusCode(500); //InternalServerError
             }
@@ -63,5 +63,30 @@ namespace NoleggioAutomezzi.Controllers
             return Ok(multa);
         }
 
+        [Route("DeleteMulta")]
+        [HttpPost]
+        public IActionResult DeleteMulta()
+        {
+            MulteRepository _repo = new MulteRepository();
+            int id = 0;
+            try
+            {
+                id = int.Parse(Request.Form["id"].ToString());
+                bool deleted = _repo.DeleteMulta(id);
+
+            }
+            catch (OperationFailedException)
+            {
+                return StatusCode(400); //Bad Request
+            }
+            catch (Exception)
+            {
+                return StatusCode(500); //InternalServerError
+            }
+
+            return Ok();
+        }
+
     }
+   
 }

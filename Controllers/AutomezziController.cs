@@ -88,5 +88,32 @@ namespace NoleggioAutomezzi.Controllers
 
             return Ok(automezzo);
         }
+        [Route("DeleteAutomezzo")]
+        [HttpPost]
+        public IActionResult DeleteAutomezzo()
+        {
+            AutomezziRepository _repo = new AutomezziRepository();
+            int id = 0;
+            int result = 0;
+            try
+            {
+                id = int.Parse(Request.Form["id"].ToString());
+
+                bool deleted = _repo.DeleteAutomezzo(id);
+                result = deleted ? 200 : 409; //409 = Conflict, l'automezzo non può essere eliminato perché ci sono
+                                              //almeno un intervento o una prenotazione collegati.
+
+            }
+            catch (OperationFailedException)
+            {
+                return StatusCode(400); //Bad Request
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500); //InternalServerError
+            }
+
+            return StatusCode(result);
+        }
     }
 }

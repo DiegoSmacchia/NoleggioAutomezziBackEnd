@@ -84,7 +84,7 @@ namespace NoleggioAutomezzi.Controllers
             {
                 return StatusCode(400); //Bad Request
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return StatusCode(500); //InternalServerError
             }

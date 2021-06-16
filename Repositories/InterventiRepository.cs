@@ -15,6 +15,7 @@ namespace NoleggioAutomezzi.Repositories
         AutomezziRepository _repoAutomezzi;
         MeccaniciRepository _repoMeccanici;
         UtentiRepository _repoUtenti;
+        MailRepository _repoMail;
 
         public InterventiRepository()
         {
@@ -22,6 +23,7 @@ namespace NoleggioAutomezzi.Repositories
             _repoAutomezzi = new AutomezziRepository();
             _repoMeccanici = new MeccaniciRepository();
             _repoUtenti = new UtentiRepository();
+            _repoMail = new MailRepository();
         }
 
         //Intervento
@@ -73,6 +75,30 @@ namespace NoleggioAutomezzi.Repositories
             }
             return list;
         }
+        public List<Intervento> ListInterventiDaChiudere()
+        {
+            List<Intervento> list = new List<Intervento>();
+            string queryString = "SELECT * FROM Interventi WHERE dataFine IS NULL";
+
+            SqliteConnection connection = _repoDatabase.Connect();
+            SqliteCommand command = new SqliteCommand(queryString, connection);
+
+            SqliteDataReader reader = command.ExecuteReader();
+            try
+            {
+                while (reader.Read())
+                {
+                    Intervento intervento = FillIntervento(reader);
+                    list.Add(intervento);
+                }
+            }
+            finally
+            {
+                reader.Close();
+                _repoDatabase.Close(connection);
+            }
+            return list;
+        }
         public Intervento GetInterventoById(int id)
         {
             Intervento intervento = null;
@@ -102,7 +128,7 @@ namespace NoleggioAutomezzi.Repositories
             string queryString = string.Format("INSERT INTO Interventi(IdAutomezzo, IdMeccanico, IdGuasto, DataInizio, DataFine) values({0}, {1}, {2}, '{3}', {4});",
                 intervento.automezzo.id,
                 intervento.meccanico.id,
-                intervento.guasto != null ? intervento.guasto.id.ToString() : "null",
+                intervento.guasto != null && intervento.guasto.id != 0 ? intervento.guasto.id.ToString() : "null",
                 intervento.dataInizio.ToString("yyyy-MM-dd"),
                 intervento.dataFine.HasValue ? "'" + intervento.dataFine.Value.ToString("yyyy-MM-dd") + "'" : "null");
 
@@ -131,7 +157,7 @@ namespace NoleggioAutomezzi.Repositories
             string queryString = string.Format("UPDATE Interventi SET IdAutomezzo = {0}, IdMeccanico = {1}, IdGuasto = {2}, DataInizio = '{3}', DataFine = {4} WHERE Id = {5}",
                 intervento.automezzo.id,
                 intervento.meccanico.id,
-                intervento.guasto != null ? intervento.guasto.id.ToString() : "null",
+                intervento.guasto != null && intervento.guasto.id != 0 ? intervento.guasto.id.ToString() : "null",
                 intervento.dataInizio.ToString("yyyy-MM-dd"),
                 intervento.dataFine.HasValue ? "'" + intervento.dataFine.Value.ToString("yyyy-MM-dd") + "'" : "null",
                 intervento.id);
@@ -167,6 +193,30 @@ namespace NoleggioAutomezzi.Repositories
 
             return updated;
         }
+        public bool DeleteIntervento(int id)
+        {
+            bool result = false;
+            string queryString = string.Format("DELETE FROM Interventi WHERE Id = {0};", id);
+
+            SqliteConnection connection = _repoDatabase.Connect();
+            SqliteCommand command = new SqliteCommand(queryString, connection);
+
+            try
+            {
+                int res = command.ExecuteNonQuery();
+                result = res == 1 ? true : false;
+            }
+            finally
+            {
+                _repoDatabase.Close(connection);
+            }
+
+            if (!result)
+                throw new OperationFailedException();
+
+            return result;
+        }
+        
         private bool ValidateIntervento(Intervento intervento, bool insertMode)
         {
             bool ok = true;
@@ -214,13 +264,22 @@ namespace NoleggioAutomezzi.Repositories
         }
         private Intervento FillIntervento(SqliteDataReader reader)
         {
+            DateTime datafine;
+            int idguasto;
             Intervento intervento = new Intervento();
             intervento.id = int.Parse(reader["Id"].ToString());
             intervento.automezzo = _repoAutomezzi.GetAutomezzoById(int.Parse(reader["IdAutomezzo"].ToString()));
             intervento.meccanico = _repoMeccanici.GetMeccanicoById(int.Parse(reader["IdMeccanico"].ToString()));
-            intervento.guasto = reader["IdGuasto"].ToString() == "null" ? null : GetGuastoById(int.Parse(reader["IdGuasto"].ToString()));
             intervento.dataInizio = DateTime.Parse(reader["DataInizio"].ToString());
-            intervento.dataFine = DateTime.Parse(reader["DataFine"].ToString());
+            if (DateTime.TryParse(reader["DataFine"].ToString(), out datafine))
+                intervento.dataFine = datafine;
+            else
+                intervento.dataFine = null;
+
+            if (int.TryParse(reader["IdGuasto"].ToString(), out idguasto))
+                intervento.guasto = GetGuastoById(idguasto);
+            else
+                intervento.guasto = null;
 
             return intervento;
         }
@@ -337,6 +396,26 @@ namespace NoleggioAutomezzi.Repositories
             {
                 int res = command.ExecuteNonQuery();
                 result = res == 1 ? true : false;
+                if (result)
+                {
+                    //Invio una mail ad admin per avvisarlo del guasto
+                    Utente admin = _repoUtenti.GetUtenteById(1);
+                    Utente utente = _repoUtenti.GetUtenteById(guasto.utente.id);
+                    Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(guasto.automezzo.id);
+                    _repoMail.SendMail(admin.indirizzoEmail, "Guasto Segnalato", string.Format(
+                        "Buongiorno {0},\n" +
+                        "E' stato segnalato un guasto dall'utente {1}:\n" +
+                        "Automezzo: {2} {3} {4}\n" +
+                        "Data: {5}\n" +
+                        "Descrizione: {6}",
+                        admin.username,
+                        utente.username,
+                        automezzo.marca,
+                        automezzo.modello,
+                        automezzo.targa,
+                        guasto.data.ToString("dd/MM/yyyy"),
+                        guasto.descrizione));
+                }
             }
             finally
             {
@@ -389,6 +468,32 @@ namespace NoleggioAutomezzi.Repositories
                 throw new OperationFailedException();
 
             return updated;
+        }
+        public bool DeleteGuasto(int id)
+        {
+            bool result = false;
+            if (CanDeleteGuasto(id))
+            {
+                string queryString = string.Format("DELETE FROM Guasti WHERE Id = {0};", id);
+
+                SqliteConnection connection = _repoDatabase.Connect();
+                SqliteCommand command = new SqliteCommand(queryString, connection);
+
+                try
+                {
+                    int res = command.ExecuteNonQuery();
+                    result = res == 1 ? true : false;
+                }
+                finally
+                {
+                    _repoDatabase.Close(connection);
+                }
+
+                if (!result)
+                    throw new OperationFailedException();
+            }
+
+            return result;
         }
         private bool ValidateGuasto(Guasto guasto, bool insertMode)
         {
@@ -445,6 +550,30 @@ namespace NoleggioAutomezzi.Repositories
             guasto.data = DateTime.Parse(reader["Data"].ToString());
 
             return guasto;
+        }
+        private bool CanDeleteGuasto(int id)
+        {
+            bool result = false;
+
+            string queryString = string.Format("SELECT * FROM Interventi WHERE IdGuasto = {0}", id);
+
+            SqliteConnection connection = _repoDatabase.Connect();
+            SqliteCommand command = new SqliteCommand(queryString, connection);
+
+            SqliteDataReader reader = command.ExecuteReader();
+            try
+            {
+                if (reader.Read())
+                    result = false;
+                else
+                    result = true;
+            }
+            finally
+            {
+                reader.Close();
+                _repoDatabase.Close(connection);
+            }
+            return result;
         }
     }
 }
