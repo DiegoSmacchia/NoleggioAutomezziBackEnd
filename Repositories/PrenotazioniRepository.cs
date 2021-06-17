@@ -118,8 +118,26 @@ namespace NoleggioAutomezzi.Repository
             {
                 _repoDatabase.Close(connection);
             }
-            
-            if(!result)
+
+            if (result)
+            {
+                Utente utente = _repoUtenti.GetUtenteById(prenotazione.utente.id);
+                Utente admin = _repoUtenti.GetUtenteById(1);
+                Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(prenotazione.automezzo.id);
+                //Invio una mail ad admin
+                _repoMail.SendMail(admin.indirizzoEmail, "Nuova Prenotazione", string.Format(
+                    "L'utente {0} ha inserito una nuova richiesta di prenotazione:\n" +
+                    "Automezzo: {1} {2} {3}\n" +
+                    "Data inizio prenotazione: {4}\n" +
+                    "Data fine prenotazione: {5}\n",
+                    utente.username,
+                    automezzo.marca,
+                    automezzo.modello,
+                    automezzo.targa,
+                    prenotazione.dataInizio.ToString("dd/MM/yyyy"),
+                    prenotazione.dataFine.ToString("dd/MM/yyyy")));
+            }
+            else
                 throw new OperationFailedException();
             return result;
         }
@@ -253,7 +271,7 @@ namespace NoleggioAutomezzi.Repository
                     Prenotazione prenotazione = GetPrenotazioneById(idPrenotazione);
                     Utente utente = _repoUtenti.GetUtenteById(prenotazione.utente.id);
                     Automezzo automezzo = _repoAutomezzi.GetAutomezzoById(prenotazione.automezzo.id);
-                    //Invio una mail al cliente per informarlo dell'accettazione della sua prenotazione.
+                    //Invio una mail al cliente per informarlo del rifiuto della sua prenotazione.
                     _repoMail.SendMail(utente.indirizzoEmail, "Prenotazione Rifiutata", string.Format(
                         "Ciao {0}," +
                         "\nLa tua richiesta di prenotazione per il mezzo {1} {2} dal giorno {3} al giorno {4} " +
