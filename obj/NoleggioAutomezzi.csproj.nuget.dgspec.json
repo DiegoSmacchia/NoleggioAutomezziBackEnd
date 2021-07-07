@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\uni\\old\\NoleggioAutomezziBackEnd\\NoleggioAutomezzi.csproj": {}
+    "C:\\Users\\Diego Smacchia\\Desktop\\NoleggioAutomezziBackEnd\\NoleggioAutomezziBackEnd\\NoleggioAutomezzi.csproj": {}
   },
   "projects": {
-    "D:\\uni\\old\\NoleggioAutomezziBackEnd\\NoleggioAutomezzi.csproj": {
+    "C:\\Users\\Diego Smacchia\\Desktop\\NoleggioAutomezziBackEnd\\NoleggioAutomezziBackEnd\\NoleggioAutomezzi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\uni\\old\\NoleggioAutomezziBackEnd\\NoleggioAutomezzi.csproj",
+        "projectUniqueName": "C:\\Users\\Diego Smacchia\\Desktop\\NoleggioAutomezziBackEnd\\NoleggioAutomezziBackEnd\\NoleggioAutomezzi.csproj",
         "projectName": "NoleggioAutomezzi",
-        "projectPath": "D:\\uni\\old\\NoleggioAutomezziBackEnd\\NoleggioAutomezzi.csproj",
+        "projectPath": "C:\\Users\\Diego Smacchia\\Desktop\\NoleggioAutomezziBackEnd\\NoleggioAutomezziBackEnd\\NoleggioAutomezzi.csproj",
         "packagesPath": "C:\\Users\\Diego Smacchia\\.nuget\\packages\\",
-        "outputPath": "D:\\uni\\old\\NoleggioAutomezziBackEnd\\obj\\",
+        "outputPath": "C:\\Users\\Diego Smacchia\\Desktop\\NoleggioAutomezziBackEnd\\NoleggioAutomezziBackEnd\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Diego Smacchia\\AppData\\Roaming\\NuGet\\NuGet.Config",
